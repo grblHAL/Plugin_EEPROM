@@ -6,7 +6,7 @@
 
   Part of grblHAL
 
-  Copyright (c) 2020 Terje Io
+  Copyright (c) 2020-2023 Terje Io
 
   Grbl is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -25,13 +25,13 @@
 
 #include "driver.h"
 
-#if EEPROM_ENABLE >= 2
+#if EEPROM_ENABLE >= 32 || EEPROM_ENABLE == 2 || EEPROM_ENABLE == 3
 
 #include "grbl/hal.h"
 #include "grbl/nuts_bolts.h"
 
 #define EEPROM_I2C_ADDRESS (0xA0 >> 1)
-#if EEPROM_ENABLE == 2
+#if EEPROM_ENABLE == 2 || EEPROM_ENABLE >= 128
 #define EEPROM_PAGE_SIZE 64
 #else
 #define EEPROM_PAGE_SIZE 32
@@ -113,6 +113,9 @@ void i2c_eeprom_init (void)
     hal.nvs.type = NVS_FRAM;
 #else
     hal.nvs.type = NVS_EEPROM;
+#endif
+#if EEPROM_ENABLE >= 32
+    hal.nvs.size_max = (EEPROM_ENABLE / 8) * 1024;
 #endif
     hal.nvs.get_byte = getByte;
     hal.nvs.put_byte = putByte;

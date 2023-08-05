@@ -4,7 +4,7 @@
 
   Part of grblHAL
 
-  Copyright (c) 2017-2020 Terje Io
+  Copyright (c) 2017-2023 Terje Io
 
   Grbl is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 #include "driver.h"
 
-#if EEPROM_ENABLE == 1
+#if EEPROM_ENABLE == 1 || EEPROM_ENABLE == 16
 
 #include "grbl/hal.h"
 #include "grbl/nuts_bolts.h"
@@ -111,6 +111,7 @@ void i2c_eeprom_init (void)
 #else
     hal.nvs.type = NVS_EEPROM;
 #endif
+    hal.nvs.size_max = 2048;
     hal.nvs.get_byte = getByte;
     hal.nvs.put_byte = putByte;
     hal.nvs.memcpy_to_nvs = writeBlock;
