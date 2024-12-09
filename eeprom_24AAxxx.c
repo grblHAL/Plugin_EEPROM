@@ -6,20 +6,20 @@
 
   Part of grblHAL
 
-  Copyright (c) 2020-2023 Terje Io
+  Copyright (c) 2020-2024 Terje Io
 
-  Grbl is free software: you can redistribute it and/or modify
+  grblHAL is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
 
-  Grbl is distributed in the hope that it will be useful,
+  grblHAL is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with Grbl.  If not, see <http://www.gnu.org/licenses/>.
+  along with grblHAL. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -28,6 +28,7 @@
 #if EEPROM_ENABLE >= 32 || EEPROM_ENABLE == 2 || EEPROM_ENABLE == 3
 
 #include "grbl/hal.h"
+#include "grbl/crc.h"
 #include "grbl/nuts_bolts.h"
 
 #define EEPROM_I2C_ADDRESS (0xA0 >> 1)
@@ -81,8 +82,13 @@ static nvs_transfer_result_t writeBlock (uint32_t destination, uint8_t *source, 
         i2c_nvs_transfer(&i2c, false);
     }
 
-    if(size > 0 && with_checksum)
-        putByte(destination, calc_checksum(source, size));
+    if(size > 0 && with_checksum) {
+        uint16_t checksum = calc_checksum(source, size);
+        putByte(destination, checksum & 0xFF);
+#if NVS_CRC_BYTES > 1
+        putByte(++destination, checksum >> 1);
+#endif
+    }
 
     return NVS_TransferResult_OK;
 }
@@ -104,7 +110,11 @@ static nvs_transfer_result_t readBlock (uint8_t *destination, uint32_t source, u
         i2c_nvs_transfer(&i2c, true);
     }
 
+#if NVS_CRC_BYTES == 1
     return with_checksum ? (calc_checksum(destination, size) == getByte(source) ? NVS_TransferResult_OK : NVS_TransferResult_Failed) : NVS_TransferResult_OK;
+#else
+    return with_checksum ? (calc_checksum(destination, size) == (getByte(source) | (getByte(source + 1) << 8)) ? NVS_TransferResult_OK : NVS_TransferResult_Failed) : NVS_TransferResult_OK;
+#endif
 }
 
 void i2c_eeprom_init (void)
