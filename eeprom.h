@@ -4,7 +4,7 @@
 
   Part of grblHAL
 
-  Copyright (c) 2017-2024 Terje Io
+  Copyright (c) 2017-2025 Terje Io
 
   grblHAL is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -21,9 +21,13 @@
 
 */
 
-#ifndef _EEPROM_H_
-#define _EEPROM_H_
+#pragma once
 
 void i2c_eeprom_init (void);
 
+static inline void eeprom_write_delay (void)
+{
+#if EEPROM_ENABLE && !EEPROM_IS_FRAM
+    hal.delay_ms(5, NULL);
 #endif
+}
