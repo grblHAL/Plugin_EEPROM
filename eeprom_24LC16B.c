@@ -91,7 +91,7 @@ static nvs_transfer_result_t writeBlock (uint32_t destination, uint8_t *source, 
         putByte(destination, checksum & 0xFF);
 #if NVS_CRC_BYTES > 1
         eeprom_write_delay();
-        putByte(++destination, checksum >> 1);
+        putByte(++destination, checksum >> 8);
 #endif
         eeprom_write_delay();
     }
