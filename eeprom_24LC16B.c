@@ -1,6 +1,6 @@
 /*
 
-  eeprom_24LC16B.c - plugin for for I2C EEPROM (Microchip 24LC16B)
+  eeprom_24LC16B.c - plugin for I2C EEPROM (Microchip 24LC16B)
 
   Part of grblHAL
 

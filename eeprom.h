@@ -1,6 +1,6 @@
 /*
 
-  eeprom.h - plugin for for I2C EEPROM or FRAM
+  eeprom.h - plugin for I2C EEPROM or FRAM
 
   Part of grblHAL
 
@@ -24,6 +24,10 @@
 #pragma once
 
 void i2c_eeprom_init (void);
+
+#if LITTLEFS_ENABLE && EEPROM_ENABLE >= 32
+struct lfs_config *eeprom_littlefs_hal (void);
+#endif
 
 static inline void eeprom_write_delay (void)
 {

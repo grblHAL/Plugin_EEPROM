@@ -1,6 +1,6 @@
 /*
 
-  eeprom_24AAxxx.c - plugin for for I2C EEPROM (Microchip 24AAxxx > 16kbit, 2 byte address)
+  eeprom_24AAxxx.c - plugin for I2C EEPROM (Microchip 24AAxxx > 16kbit, 2 byte address)
 
   NOTE: only tested with 24AA256
 
