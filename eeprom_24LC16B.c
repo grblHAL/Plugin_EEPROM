@@ -124,9 +124,11 @@ static nvs_transfer_result_t readBlock (uint8_t *destination, uint32_t source, u
 #endif
 }
 
-void i2c_eeprom_init (void)
+bool i2c_eeprom_init (void)
 {
-    if(i2c_start().ok && i2c_probe(EEPROM_I2C_ADDRESS)) {
+    bool ok;
+
+    if((ok = i2c_start().ok && i2c_probe(EEPROM_I2C_ADDRESS))) {
 #if EEPROM_IS_FRAM
         hal.nvs.type = NVS_FRAM;
 #else
@@ -138,6 +140,8 @@ void i2c_eeprom_init (void)
         hal.nvs.memcpy_to_nvs = writeBlock;
         hal.nvs.memcpy_from_nvs = readBlock;
     }
+
+    return ok;
 }
 
 #endif

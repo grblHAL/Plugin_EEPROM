@@ -23,7 +23,7 @@
 
 #pragma once
 
-void i2c_eeprom_init (void);
+bool i2c_eeprom_init (void);
 
 #if LITTLEFS_ENABLE && EEPROM_ENABLE >= 32
 struct lfs_config *eeprom_littlefs_hal (void);
