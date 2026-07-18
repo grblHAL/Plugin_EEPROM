@@ -2,11 +2,9 @@
 
   eeprom_24AAxxx.c - plugin for I2C EEPROM (Microchip 24AAxxx > 16kbit, 2 byte address)
 
-  NOTE: only tested with 24AA256
-
   Part of grblHAL
 
-  Copyright (c) 2020-2025 Terje Io
+  Copyright (c) 2020-2026 Terje Io
 
   grblHAL is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -34,7 +32,9 @@
 #include "grbl/nuts_bolts.h"
 
 #define EEPROM_I2C_ADDRESS (0xA0 >> 1)
-#if EEPROM_ENABLE == 2 || EEPROM_ENABLE >= 128
+#if EEPROM_ENABLE == 1024
+#define EEPROM_PAGE_SIZE 256
+#elif EEPROM_ENABLE == 2 || EEPROM_ENABLE >= 128
 #define EEPROM_PAGE_SIZE 64
 #else
 #define EEPROM_PAGE_SIZE 32
@@ -47,6 +47,10 @@ static uint8_t getByte (uint32_t addr)
     uint8_t value = 0;
 
     i2c.address = EEPROM_I2C_ADDRESS;
+#if EEPROM_ENABLE == 1024
+    if(addr > 0xFFFF)
+        i2c.address |= 1;
+#endif
     i2c.word_addr = addr;
     i2c.data = &value;
     i2c.count = 1;
@@ -59,6 +63,10 @@ static uint8_t getByte (uint32_t addr)
 static void putByte (uint32_t addr, uint8_t new_value)
 {
     i2c.address = EEPROM_I2C_ADDRESS;
+#if EEPROM_ENABLE == 1024
+    if(addr > 0xFFFF)
+        i2c.address |= 1;
+#endif
     i2c.word_addr = addr;
     i2c.data = &new_value;
     i2c.count = 1;
@@ -75,6 +83,11 @@ static nvs_transfer_result_t writeBlock (uint32_t destination, uint8_t *source, 
     while(remaining > 0) {
 
         i2c.address = EEPROM_I2C_ADDRESS;
+#if EEPROM_ENABLE == 1024
+        if(destination > 0xFFFF)
+            i2c.address |= 1;
+#endif
+
         i2c.word_addr = destination;
         i2c.count = EEPROM_PAGE_SIZE - (destination & (EEPROM_PAGE_SIZE - 1));
         i2c.count = remaining < i2c.count ? remaining : i2c.count;
@@ -110,6 +123,10 @@ static nvs_transfer_result_t readBlock (uint8_t *destination, uint32_t source, u
     while(remaining) {
 
         i2c.address = EEPROM_I2C_ADDRESS;
+#if EEPROM_ENABLE == 1024
+        if(source > 0xFFFF)
+            i2c.address |= 1;
+#endif
         i2c.word_addr = source;
         i2c.count = remaining > 255 ? 255 : (uint8_t)remaining;
         i2c.data = target;

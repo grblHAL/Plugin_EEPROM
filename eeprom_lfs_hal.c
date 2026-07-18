@@ -4,7 +4,7 @@
 
   Part of grblHAL
 
-  Copyright (c) 2025 Terje Io
+  Copyright (c) 2025-2026 Terje Io
 
   grblHAL is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -28,6 +28,8 @@
 #include "littlefs/lfs.h"
 
 #include "grbl/nvs_buffer.h"
+
+#define LFS_BLOCK_SIZE 256
 
 typedef struct {
     uint32_t baseaddr;
@@ -78,8 +80,8 @@ struct lfs_config *eeprom_littlefs_hal (void)
         .erase = lfs_hal_erase,
         .sync = lfs_hal_sync,
         .read_size = 1,
-        .prog_size = 256,
-        .block_size = 256,
+        .prog_size = LFS_BLOCK_SIZE,
+        .block_size = LFS_BLOCK_SIZE,
         .cache_size = 256,
         .lookahead_size = 32,
         .block_cycles = 500
@@ -90,8 +92,8 @@ struct lfs_config *eeprom_littlefs_hal (void)
     eeprom.read_block = nvs->memcpy_from_nvs;
     eeprom.write_block = nvs->memcpy_to_nvs;
 
-    ctx.baseaddr = max(4096, nvs->size);
-    lfs_cfg.block_count = (nvs->size_max - ctx.baseaddr) / 256;
+    ctx.baseaddr = ((max(4096, nvs->size) - 1) | (LFS_BLOCK_SIZE - 1)) + 1;
+    lfs_cfg.block_count = (nvs->size_max - ctx.baseaddr) / LFS_BLOCK_SIZE;
 
     return &lfs_cfg;
 }
